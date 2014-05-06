@@ -7,7 +7,7 @@ import requests
 from urlparse import parse_qs
 
 from .constants import XERO_API_URL
-from .exceptions import *
+from .exceptions import *  # noqa
 
 
 class Manager(object):
@@ -16,11 +16,11 @@ class Manager(object):
     DATETIME_FIELDS = (u'UpdatedDateUTC', u'Updated', u'FullyPaidOnDate')
     DATE_FIELDS = (u'DueDate', u'Date')
     BOOLEAN_FIELDS = (u'IsSupplier', u'IsCustomer')
-    OTHER_DATATYPES = {u'ContactID':u'Guid', u'InvoiceID':u'Guid'}
+    OTHER_DATATYPES = {u'ContactID': u'Guid', u'InvoiceID': u'Guid'}
 
     MULTI_LINES = (u'LineItem', u'Phone', u'Address', 'TaxRate')
     PLURAL_EXCEPTIONS = {'Addresse': 'Address'}
-    
+
     NO_SEND_FIELDS = (u'UpdatedDateUTC',)
 
     def __init__(self, name, oauth):
@@ -30,7 +30,7 @@ class Manager(object):
         # setup our singular variants of the name
         # only if the name ends in 0
         if name[-1] == "s":
-            self.singular = name[:len(name)-1]
+            self.singular = name[:len(name) - 1]
         else:
             self.singular = name
 
@@ -94,13 +94,13 @@ class Manager(object):
             # Xero will complain if we send back these fields.
             if key in self.NO_SEND_FIELDS:
                 continue
-            
+
             sub_data = data[key]
             elm = SubElement(root_elm, key)
 
             is_list = isinstance(sub_data, list) or isinstance(sub_data, tuple)
-            is_plural = key[len(key)-1] == "s"
-            plural_name = key[:len(key)-1]
+            is_plural = key[len(key) - 1] == "s"
+            plural_name = key[:len(key) - 1]
 
             # Key references a dict. Unroll the dict
             # as it's own XML node with subnodes
@@ -125,7 +125,7 @@ class Manager(object):
 
             # Normal element - just inser the data.
             else:
-                elm.text = str(sub_data)
+                elm.text = unicode(sub_data)
 
         return root_elm
 
@@ -231,14 +231,14 @@ class Manager(object):
                 # support strange datatypes like the Guid
                 last_key = key.split('_')[-1]
                 if last_key in self.OTHER_DATATYPES.keys():
-                    return '%s("%s")' % (str(self.OTHER_DATATYPES[last_key]),str(kwargs[key]))
-                
+                    return '%s("%s")' % (unicode(self.OTHER_DATATYPES[last_key]), unicode(kwargs[key]))
+
                 if key in self.BOOLEAN_FIELDS:
                     return 'true' if kwargs[key] else 'false'
                 elif key in self.DATETIME_FIELDS:
                     return kwargs[key].isoformat()
                 else:
-                    return '"%s"' % str(kwargs[key])
+                    return '"%s"' % unicode(kwargs[key])
 
             def generate_param(key):
                 parts = key.split("__")
